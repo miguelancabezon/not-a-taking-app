@@ -1,6 +1,7 @@
 import React from 'react';
 import { Menu, Plus } from 'lucide-react';
 import { StudioThemeConfig } from '../types/notes';
+import { PWAInstallButton } from './PWAInstallButton';
 
 interface TopBarProps {
   theme: StudioThemeConfig;
@@ -87,8 +88,9 @@ export const TopBar: React.FC<TopBarProps> = ({
           })}
         </nav>
 
-        {/* Zone 3: 1 primary CTA */}
-        <div className="shrink-0">
+        {/* Zone 3: PWA install + 1 primary CTA */}
+        <div className="flex items-center gap-2 shrink-0">
+          <PWAInstallButton theme={theme} />
           <button
             type="button"
             onClick={onNewNote}

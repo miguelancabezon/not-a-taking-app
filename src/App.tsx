@@ -4,6 +4,7 @@ import { CustomizationDrawer } from './components/CustomizationDrawer';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { NoteCard } from './components/NoteCard';
 import { NoteEditorModal } from './components/NoteEditorModal';
+import { OfflineIndicator } from './components/OfflineIndicator';
 import { QuickComposer } from './components/QuickComposer';
 import { RetroUnlockModal } from './components/RetroUnlockModal';
 import { Sidebar } from './components/Sidebar';
@@ -444,6 +445,8 @@ function CozyStudioApp() {
         onUnlockOrEnableE2EE={unlockOrEnableE2EE}
         onLockE2EE={lockE2EE}
       />
+
+      <OfflineIndicator theme={theme} />
     </div>
   );
 }
