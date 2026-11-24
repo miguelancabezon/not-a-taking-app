@@ -1,0 +1,108 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    transition: background-color 220ms cubic-bezier(0.16, 1, 0.3, 1), color 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  a:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+}
+
+/* Cozy Studio Font Presets */
+.font-preset-editorial {
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'Lora', Georgia, serif;
+}
+
+.font-preset-moderna {
+  --font-display: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+.font-preset-manuscrita {
+  --font-display: 'Caveat', cursive;
+  --font-body: 'Caveat', cursive;
+}
+
+.font-preset-maquina {
+  --font-display: 'JetBrains Mono', monospace;
+  --font-body: 'JetBrains Mono', monospace;
+}
+
+.font-studio-display {
+  font-family: var(--font-display, 'Cormorant Garamond', Georgia, serif);
+}
+
+.font-studio-body {
+  font-family: var(--font-body, 'Lora', Georgia, serif);
+}
+
+/* Subtle Tactile Surface Textures */
+.texture-plain {
+  background-image: none;
+}
+
+.texture-dots {
+  background-image: radial-gradient(var(--texture-ink, rgba(255, 255, 255, 0.08)) 1.1px, transparent 1.1px);
+  background-size: 22px 22px;
+}
+
+.texture-lined {
+  background-image: linear-gradient(to bottom, transparent 31px, var(--texture-ink, rgba(255, 255, 255, 0.06)) 32px);
+  background-size: 100% 32px;
+}
+
+.texture-grid {
+  background-image:
+    linear-gradient(to right, var(--texture-ink, rgba(255, 255, 255, 0.05)) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--texture-ink, rgba(255, 255, 255, 0.05)) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.texture-grain {
+  background-image:
+    radial-gradient(circle at 20% 25%, var(--texture-ink, rgba(255, 255, 255, 0.04)) 0.8px, transparent 1px),
+    radial-gradient(circle at 75% 65%, var(--texture-ink, rgba(255, 255, 255, 0.035)) 0.8px, transparent 1px);
+  background-size: 18px 18px, 27px 27px;
+}
+
+.retro-crt-overlay {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0px,
+    rgba(0, 0, 0, 0) 2px,
+    rgba(0, 12, 4, 0.24) 3px,
+    rgba(0, 12, 4, 0.24) 4px
+  );
+}
+
+.retro-lcd-overlay {
+  background-image:
+    linear-gradient(to right, rgba(15, 56, 15, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(15, 56, 15, 0.045) 1px, transparent 1px);
+  background-size: 4px 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

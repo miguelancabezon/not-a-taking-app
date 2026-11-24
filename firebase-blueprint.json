@@ -1,0 +1,155 @@
+{
+  "entities": {
+    "Note": {
+      "title": "Note",
+      "description": "A cozy user note with title, body content, tags, placed aesthetic stickers, paper tint, and font preference.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Firebase Auth UID of the note owner."
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 160,
+          "description": "Title of the note."
+        },
+        "content": {
+          "type": "string",
+          "maxLength": 20000,
+          "description": "Body text of the note."
+        },
+        "tags": {
+          "type": "array",
+          "description": "Up to 10 short organizational tags."
+        },
+        "stickers": {
+          "type": "array",
+          "description": "Up to 20 placed aesthetic sticker objects on the note."
+        },
+        "paperColor": {
+          "type": "string",
+          "enum": ["default", "crema", "salvia", "lavanda", "melocoton", "cielo"],
+          "minLength": 1,
+          "maxLength": 32,
+          "description": "Identifier for the note's individual cozy paper background."
+        },
+        "fontFamily": {
+          "type": "string",
+          "enum": ["studio", "editorial", "moderna", "manuscrita", "maquina"],
+          "minLength": 1,
+          "maxLength": 32,
+          "description": "Font preset identifier for this note."
+        },
+        "pinned": {
+          "type": "boolean",
+          "description": "Whether the note is pinned to the top."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the note was created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the note was last updated."
+        }
+      },
+      "required": [
+        "ownerId",
+        "title",
+        "content",
+        "tags",
+        "stickers",
+        "paperColor",
+        "fontFamily",
+        "pinned",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "StudioPreferences": {
+      "title": "StudioPreferences",
+      "description": "User workspace customization settings for background theme, surface texture, and typography.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Firebase Auth UID of the workspace owner."
+        },
+        "themeId": {
+          "type": "string",
+          "enum": [
+            "pizarra-nocturna",
+            "miel-canela",
+            "caramelo-tostado",
+            "gameboy-clasica",
+            "atardecer-otono",
+            "noche-estrellada",
+            "pipboy-verde"
+          ],
+          "minLength": 1,
+          "maxLength": 32,
+          "description": "Selected cozy studio background theme ID."
+        },
+        "textureId": {
+          "type": "string",
+          "enum": ["plain", "dots", "lined", "grid", "grain"],
+          "minLength": 1,
+          "maxLength": 32,
+          "description": "Selected paper/desk surface texture ID."
+        },
+        "fontId": {
+          "type": "string",
+          "enum": ["editorial", "moderna", "manuscrita", "maquina"],
+          "minLength": 1,
+          "maxLength": 32,
+          "description": "Selected default studio font ID."
+        },
+        "fontSize": {
+          "type": "string",
+          "enum": ["sm", "md", "lg"],
+          "description": "Selected comfortable reading/writing size."
+        },
+        "unlockedThemes": {
+          "type": "array",
+          "description": "List of secret retro theme IDs unlocked via the mini-game."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when preferences were last synced."
+        }
+      },
+      "required": [
+        "ownerId",
+        "themeId",
+        "textureId",
+        "fontId",
+        "fontSize",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/notes/{noteId}": {
+      "schema": {
+        "$ref": "#/entities/Note"
+      },
+      "description": "Per-user notes collection secured by ownerId."
+    },
+    "/studioPreferences/{userId}": {
+      "schema": {
+        "$ref": "#/entities/StudioPreferences"
+      },
+      "description": "Per-user cozy workspace preferences keyed by userId."
+    }
+  }
+}

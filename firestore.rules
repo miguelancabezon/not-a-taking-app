@@ -1,0 +1,178 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net: Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Global Hardened Primitives ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Validation Blueprints ---
+    function isValidNote(data) {
+      return data.keys().hasAll([
+          'ownerId', 'title', 'content', 'tags', 'stickers',
+          'paperColor', 'fontFamily', 'pinned', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'ownerId', 'title', 'content', 'tags', 'stickers',
+          'paperColor', 'fontFamily', 'pinned', 'createdAt', 'updatedAt'
+        ])
+        && data.ownerId is string
+        && data.ownerId.size() >= 1
+        && data.ownerId.size() <= 128
+        && data.ownerId == request.auth.uid
+        && data.title is string
+        && data.title.size() <= 160
+        && data.content is string
+        && data.content.size() <= 20000
+        && data.tags is list
+        && data.tags.size() <= 10
+        && (data.tags.size() == 0 || (data.tags[0] is string && data.tags[0].size() >= 1 && data.tags[0].size() <= 32))
+        && data.stickers is list
+        && data.stickers.size() <= 20
+        && (
+          data.stickers.size() == 0 || (
+            data.stickers[0] is map
+            && data.stickers[0].keys().hasAll(['id', 'stickerKey', 'x', 'y', 'scale', 'rotation'])
+            && data.stickers[0].keys().hasOnly(['id', 'stickerKey', 'x', 'y', 'scale', 'rotation'])
+            && data.stickers[0].id is string && data.stickers[0].id.size() >= 1 && data.stickers[0].id.size() <= 64
+            && data.stickers[0].stickerKey is string && data.stickers[0].stickerKey.size() >= 1 && data.stickers[0].stickerKey.size() <= 40
+            && data.stickers[0].x is number && data.stickers[0].x >= 0 && data.stickers[0].x <= 100
+            && data.stickers[0].y is number && data.stickers[0].y >= 0 && data.stickers[0].y <= 100
+            && data.stickers[0].scale is number && data.stickers[0].scale >= 0.5 && data.stickers[0].scale <= 2
+            && data.stickers[0].rotation is number && data.stickers[0].rotation >= -45 && data.stickers[0].rotation <= 45
+          )
+        )
+        && data.paperColor is string
+        && data.paperColor.size() >= 1
+        && data.paperColor.size() <= 32
+        && data.paperColor in ['default', 'crema', 'salvia', 'lavanda', 'melocoton', 'cielo']
+        && data.fontFamily is string
+        && data.fontFamily.size() >= 1
+        && data.fontFamily.size() <= 32
+        && data.fontFamily in ['studio', 'editorial', 'moderna', 'manuscrita', 'maquina']
+        && data.pinned is bool
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidPreferences(data) {
+      return data.keys().hasAll(['ownerId', 'themeId', 'textureId', 'fontId', 'fontSize', 'updatedAt'])
+        && data.keys().hasOnly(['ownerId', 'themeId', 'textureId', 'fontId', 'fontSize', 'unlockedThemes', 'updatedAt'])
+        && data.ownerId is string
+        && data.ownerId.size() >= 1
+        && data.ownerId.size() <= 128
+        && data.ownerId == request.auth.uid
+        && data.themeId is string
+        && data.themeId.size() >= 1
+        && data.themeId.size() <= 32
+        && data.themeId in [
+          'pizarra-nocturna',
+          'miel-canela',
+          'caramelo-tostado',
+          'gameboy-clasica',
+          'atardecer-otono',
+          'noche-estrellada',
+          'pipboy-verde'
+        ]
+        && data.textureId is string
+        && data.textureId.size() >= 1
+        && data.textureId.size() <= 32
+        && data.textureId in ['plain', 'dots', 'lined', 'grid', 'grain']
+        && data.fontId is string
+        && data.fontId.size() >= 1
+        && data.fontId.size() <= 32
+        && data.fontId in ['editorial', 'moderna', 'manuscrita', 'maquina']
+        && data.fontSize is string
+        && data.fontSize in ['sm', 'md', 'lg']
+        && (!('unlockedThemes' in data) || (
+          data.unlockedThemes is list
+          && data.unlockedThemes.size() <= 10
+          && data.unlockedThemes.hasOnly(['gameboy-clasica', 'pipboy-verde'])
+        ))
+        && data.updatedAt is timestamp;
+    }
+
+    // --- Collection: /notes/{noteId} ---
+    match /notes/{noteId} {
+      allow get: if isSignedIn()
+        && isValidId(noteId)
+        && existing().ownerId == request.auth.uid;
+
+      allow list: if isSignedIn()
+        && existing().ownerId == request.auth.uid;
+
+      allow create: if isVerifiedUser()
+        && isValidId(noteId)
+        && isValidNote(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+
+      allow update: if isVerifiedUser()
+        && isValidId(noteId)
+        && existing().ownerId == request.auth.uid
+        && isValidNote(incoming())
+        && incoming().ownerId == existing().ownerId
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'title', 'content', 'tags', 'stickers',
+          'paperColor', 'fontFamily', 'pinned', 'updatedAt'
+        ]);
+
+      allow delete: if isVerifiedUser()
+        && isValidId(noteId)
+        && existing().ownerId == request.auth.uid;
+    }
+
+    // --- Collection: /studioPreferences/{userId} ---
+    match /studioPreferences/{userId} {
+      allow get: if isSignedIn()
+        && isValidId(userId)
+        && userId == request.auth.uid;
+
+      allow list: if false;
+
+      allow create: if isVerifiedUser()
+        && isValidId(userId)
+        && userId == request.auth.uid
+        && isValidPreferences(incoming())
+        && incoming().updatedAt == request.time;
+
+      allow update: if isVerifiedUser()
+        && isValidId(userId)
+        && userId == request.auth.uid
+        && isValidPreferences(incoming())
+        && incoming().ownerId == existing().ownerId
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'themeId', 'textureId', 'fontId', 'fontSize', 'unlockedThemes', 'updatedAt'
+        ]);
+
+      allow delete: if isVerifiedUser()
+        && isValidId(userId)
+        && userId == request.auth.uid;
+    }
+  }
+}

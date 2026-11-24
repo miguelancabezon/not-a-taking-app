@@ -1,0 +1,6 @@
+{
+  "name": "Notas del día — Estudio Cozy",
+  "description": "Espacio acogedor de toma de notas con fondos personalizables, fuentes, stickers estéticos, etiquetas y sincronización automática.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
